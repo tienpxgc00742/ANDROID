@@ -104,11 +104,8 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-//        mCustomVideoView.setVideo("http://rmcdn.2mdn.net/MotifFiles/html/1248596/android_1330378998288.mp4",
-//                DefaultCustomPlayerController.DEFAULT_VIDEO_START);
-//        mCustomVideoView.start();
         Log.d("onPostCreate", "onPostCreate reached.");
-        if (isRotationLock == true) {
+        if (isRotationLock) {
             Log.d("onPostCreate", "rotation locked.");
             this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
@@ -271,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
                         isForceScreenRequest = false;
                         mRotateState1 = mRotateState2 = false;
-                        Log.d("onOrientationChanged", "reset rotate stage to stage 1: " + String.valueOf(mRotateState1) + ", stage 2: " + String.valueOf(mRotateState2));
+//                        Log.d("onOrientationChanged", "reset rotate stage to stage 1: " + String.valueOf(mRotateState1) + ", stage 2: " + String.valueOf(mRotateState2));
                         this.disable();
                     }
                 } else {
@@ -286,15 +283,17 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     }
 
     //khởi tạo trình phát video - thêm link trong setVideo
-    public static void reloadFloatVideoPlayer() {
+    public static void reloadFloatVideoPlayer(String url) {
         int dismissableViewChildCount = mDismissableContainer.getChildCount();
         Log.d("DismissViewChildCount", String.valueOf(dismissableViewChildCount));
-        mCustomVideoView.setMediaController(mController);
-        mCustomVideoView.setOnPlayStateListener(mController);
-        mLayoutDraggable.setVisibility(View.VISIBLE);
-        mDismissableContainer.invalidate();
-        mCustomVideoView.setVideo("http://rmcdn.2mdn.net/MotifFiles/html/1248596/android_1330378998288.mp4", DefaultCustomPlayerController.DEFAULT_VIDEO_START);
-        mCustomVideoView.start();
+        if(mCustomVideoView.getPreviousStream()!=url){
+            mCustomVideoView.setMediaController(mController);
+            mCustomVideoView.setOnPlayStateListener(mController);
+            mLayoutDraggable.setVisibility(View.VISIBLE);
+            mDismissableContainer.invalidate();
+            mCustomVideoView.setVideo(url, DefaultCustomPlayerController.DEFAULT_VIDEO_START);
+            mCustomVideoView.start();
+        }
         if (dismissableViewChildCount != 1 && dismissableViewChildCount < 1) {
             mDismissableContainer.addView(mDraggableViewGroup);
         }
@@ -488,7 +487,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         super.onConfigurationChanged(newConfig);
         //thiết đặt mặc định khi player chưa hiển thị
         if (!isRotationLock) {
-            if (!mDraggableViewGroup.isMinimize && mController.getMediaPlayer() != null && mController.getMediaPlayer().isPlaying() && isForceScreenRequest == false) {
+            if (!mDraggableViewGroup.isMinimize && mController.getMediaPlayer() != null && mController.getMediaPlayer().isPlaying() && !isForceScreenRequest) {
                 //xoay bằng cảm biến
                 if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     mController.setFullSreenButtonIconByStage(true);
