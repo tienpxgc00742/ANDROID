@@ -31,4 +31,6 @@
     <string name="loading">Đang tải...</string>
     <string name="warning_no_network">Không có kết nối mạng</string>
     <string name="refresh">Làm mới</string>
+
+    <string name="back_pressed">Nhấn back lại để thoát</string>
 </resources>

@@ -11,6 +11,7 @@ import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -54,6 +55,7 @@ import com.tnaapp.tnalayout.control.video.CustomPlayerControllerVisibilityListen
 import com.tnaapp.tnalayout.control.video.CustomVideoView;
 import com.tnaapp.tnalayout.control.video.DefaultCustomPlayerController;
 import com.tnaapp.tnalayout.utils.DownloadImageTask;
+import com.tnaapp.tnalayout.utils.T;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,17 +90,40 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private static LinearLayout mLayoutDraggable;
     private static ViewGroup mDismissableContainer;
 
+    // Back Pressed
+    private boolean mBackpressed = false;
+
     @Override
     public void onBackPressed() {
+
         if (mFragmentDrawer.isDrawerOpen())
             mFragmentDrawer.closeDrawer();
         else {
-            if (mDraggableViewGroup.isMinimize)
-                super.onBackPressed();
-            else {
+            if (mDraggableViewGroup.isMinimize) {
+                handleBackPressed();
+            } else {
                 mDraggableViewGroup.minimize();
+
             }
         }
+
+
+    }
+
+    private void handleBackPressed() {
+        if (mBackpressed) {
+            super.onBackPressed();
+            return;
+        }
+        T.s(this, getResources().getString(R.string.back_pressed));
+        mBackpressed = true;
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                mBackpressed = false;
+            }
+        }, 2000);
     }
 
     @Override
@@ -286,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     public static void reloadFloatVideoPlayer(String url) {
         int dismissableViewChildCount = mDismissableContainer.getChildCount();
         Log.d("DismissViewChildCount", String.valueOf(dismissableViewChildCount));
-        if(mCustomVideoView.getPreviousStream()!=url){
+        if (mCustomVideoView.getPreviousStream() != url) {
             mCustomVideoView.setMediaController(mController);
             mCustomVideoView.setOnPlayStateListener(mController);
             mLayoutDraggable.setVisibility(View.VISIBLE);
@@ -501,6 +526,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         }
     }
 
+
     //biến điều khiển xoay
     //nếu thực hiện fullscreen bằng button
     //xoay lên 1 lần nữa để đưa về tự động xoay
@@ -508,4 +534,9 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private boolean isForceScreenRequest = false; //bấm nút fullscreen hay dùng xoay bằng cảm biếm
     private OrientationEventListener mOrientationEventListener; //theo dõi cảm biến xoay
     private boolean isRotationLock = true; //khóa xoay - vô hiệu xoay cảm biến - load từ settings
+
+
+    // Back Pressed
+
+
 }
