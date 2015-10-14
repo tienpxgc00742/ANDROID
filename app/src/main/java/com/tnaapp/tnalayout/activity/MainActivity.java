@@ -16,6 +16,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
@@ -48,6 +49,7 @@ import com.tnaapp.tnalayout.activity.fragments.FavoriteFragment;
 import com.tnaapp.tnalayout.activity.fragments.GuideFragment;
 import com.tnaapp.tnalayout.activity.fragments.HistoryFragment;
 import com.tnaapp.tnalayout.activity.fragments.HomeFragment;
+import com.tnaapp.tnalayout.activity.fragments.SearchResultFragment;
 import com.tnaapp.tnalayout.control.DraggableViewGroup;
 import com.tnaapp.tnalayout.control.DraggableViewListener;
 import com.tnaapp.tnalayout.control.SwipeDismissTouchListener;
@@ -64,7 +66,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-public class MainActivity extends AppCompatActivity implements FragmentDrawer.FragmentDrawerListener, CustomPlayerControllerVisibilityListener {
+public class MainActivity extends AppCompatActivity implements FragmentDrawer.FragmentDrawerListener, CustomPlayerControllerVisibilityListener, SearchView.OnQueryTextListener {
     private static String TAG = MainActivity.class.getSimpleName();
 
     public static Toolbar mToolbar;
@@ -73,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private AboutFragment mAboutFragment;
     private HistoryFragment mHistoryFragment;
     private FavoriteFragment mFavoriteFragment;
+    private SearchResultFragment mSearchResultFragment;
     private GuideFragment mGuideFragment;
     public static AccessToken mAccessToken;
     private CallbackManager mCallbackManager;
@@ -216,18 +219,12 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         mHistoryFragment = new HistoryFragment();
         mAboutFragment = new AboutFragment();
         mFavoriteFragment = new FavoriteFragment();
+        mSearchResultFragment = new SearchResultFragment();
         mGuideFragment = new GuideFragment();
         //end fragment init
 
         //khởi tạo searchview
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
-        mSearchView = new SearchView(getSupportActionBar().getThemedContext());
-        mSearchView.setSearchableInfo(searchManager
-                .getSearchableInfo(getComponentName()));
-        mSearchView.setSubmitButtonEnabled(true);
-        mSearchView.setIconifiedByDefault(true);
-        mSearchView.setMaxWidth(1000);
         mSettingsActivity = new SettingsActivity();
         //hết searchview
 
@@ -399,8 +396,9 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        mSearchView.setOnQueryTextListener(this);
         return true;
     }
 
@@ -536,7 +534,40 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private boolean isRotationLock = true; //khóa xoay - vô hiệu xoay cảm biến - load từ settings
 
 
-    // Back Pressed
+    // Search Text
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+
+        mSearchView.clearFocus();
+        handleSearchText(query);
+        return true;
+    }
+
+    private void handleSearchText(String text) {
+
+        String tag = getResources().getString(R.string.search_fragment_tag);
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        if (fragmentManager.findFragmentByTag(tag) == null) {
+
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+
+            fragmentTransaction.replace(R.id.container_body, mSearchResultFragment, tag);
+            fragmentTransaction.commit();
+            // set the toolbar title
+            getSupportActionBar().setTitle(R.string.action_search);
+        } else {
+            mSearchResultFragment = (SearchResultFragment) fragmentManager.findFragmentByTag(tag);
+        }
+        mSearchResultFragment.setQuery(text);
+
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+
+        return true;
+    }
 
 
 }

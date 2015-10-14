@@ -48,4 +48,6 @@
     <string name="play_progressive_error_message">Impossible to play the progressive video.</string>
 
     <string name="back_pressed">Please click BACK again to exit</string>
+
+    <string name="search_fragment_tag">searchTag</string>
 </resources>
