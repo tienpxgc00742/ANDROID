@@ -18,9 +18,9 @@ import com.tnaapp.tnalayout.R;
 /**
  * Created by dfChicken on 06/10/2015.
  */
-public class DraggableViewGroup extends ViewGroup {
+public class SlideUpViewGroup extends ViewGroup {
 
-    private static final String TAG = "DraggableViewGroup"; //chỉnh sửa lại từ YoutubeLayout github
+    private static final String TAG = "SlideUpViewGroup"; //chỉnh sửa lại từ DraggableViewGroup
     private static final int MIN_FLING_VELOCITY = 400; // dips per second
     public View mHeaderView;
     public View mDescView;
@@ -63,11 +63,8 @@ public class DraggableViewGroup extends ViewGroup {
             mDragOffset = (float) top / mVerticalRange;
             mHeaderView.setPivotX(mHeaderView.getWidth());
             mHeaderView.setPivotY(mHeaderView.getHeight());
-            //thu nhỏ trình player
-            mHeaderView.setScaleX(1 - mDragOffset / 2f);
-            mHeaderView.setScaleY(1 - mDragOffset / 2.22f);
 //            mVideoView.getHolder().setFixedSize(Math.round(1 - mDragOffset / 2f) , 1 - mDragOffset / 2.22f);
-            mDescView.setAlpha(1 - mDragOffset);
+
 //            Log.d("mTop",String.valueOf(mTop));
             if (mDragOffset == 0.0f) {
                 isMinimize = false;
@@ -85,7 +82,7 @@ public class DraggableViewGroup extends ViewGroup {
         @Override
         public int clampViewPositionVertical(View child, int top, int dy) {
             final int topBound = getPaddingTop();
-            final int bottomBound = getHeight() - mHeaderView.getHeight() - mHeaderView.getPaddingBottom();
+            final int bottomBound = getHeight();
             final int newTop = Math.min(Math.max(top, topBound), bottomBound);
 
             return newTop;
@@ -119,17 +116,17 @@ public class DraggableViewGroup extends ViewGroup {
         this.mRunnerActivity = activity;
     }
 
-    public DraggableViewGroup(Context context) {
+    public SlideUpViewGroup(Context context) {
         super(context);
         init(context);
     }
 
-    public DraggableViewGroup(Context context, AttributeSet attrs) {
+    public SlideUpViewGroup(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public DraggableViewGroup(Context context, AttributeSet attrs, int defStyle) {
+    public SlideUpViewGroup(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(context);
     }
@@ -181,7 +178,7 @@ public class DraggableViewGroup extends ViewGroup {
         isFullScreen = true;
     }
 
-    public void forceRequestFloatPlayer(){
+    public void forceRequestFloatPlayer() {
         Log.d("DraggableViewGroup", "force requestFloatPlayer by user");
         mDescView.setVisibility(VISIBLE);
         mRunnerActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -228,9 +225,9 @@ public class DraggableViewGroup extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int parentViewHeight = getHeight();
-        int dragViewHeight = mHeaderView.getMeasuredHeight();
-        mVerticalRange = parentViewHeight - dragViewHeight; //giới hạn lề dưới
+//        int parentViewHeight = getHeight();
+//        int dragViewHeight = mHeaderView.getMeasuredHeight();
+        mVerticalRange = getHeight(); //kéo xuống kịch luôn
         mHeaderView.layout(0, mTop, r, mTop + mHeaderView.getMeasuredHeight());
         mDescView.layout(0, mTop + mHeaderView.getMeasuredHeight(), r, mTop + b);
     }
@@ -244,11 +241,10 @@ public class DraggableViewGroup extends ViewGroup {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        //điều khiển chạm vào player
         if (isHeaderTarget(event) && mViewDragHelper.shouldInterceptTouchEvent(event)) {
             return true;
         } else {
-            // thu nhỏ thì vô hiệu vuốt trái, phải -> áp dụng cho isMinimize trong SwipeDismissTouchListener.DismissCallbacks event
+            // thu nhỏ thì vô hiệu vuốt trái, phải -> áp dụng isMinimize trong SwipeDismissTouchListener.DismissCallbacks event
             if (isMinimize) {
                 return true;
             }

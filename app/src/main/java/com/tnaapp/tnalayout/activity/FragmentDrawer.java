@@ -50,7 +50,6 @@ public class FragmentDrawer extends Fragment {
     private DrawerLayout mDrawerLayout;
     private NavigationDrawerAdapter mNavigationDrawerAdapter;
     private View mFragmentContainerView;
-    private int mCurrentSelectedPosition;
     private FragmentDrawerListener mFragmentDrawerListener;
     public static TextView mUserName;
     public static RoundedImageView mUserImage;
@@ -204,7 +203,6 @@ public class FragmentDrawer extends Fragment {
     }
 
     public void selectItem(int position) {
-        mCurrentSelectedPosition = position;
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }

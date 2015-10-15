@@ -15,6 +15,15 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginTop="5dp"
+        android:animateLayoutChanges="true"
         android:groupIndicator="@null" />
+
+    <ProgressBar
+        android:visibility="invisible"
+        android:id="@+id/item_video_loading_view"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center" />
 
 </RelativeLayout>

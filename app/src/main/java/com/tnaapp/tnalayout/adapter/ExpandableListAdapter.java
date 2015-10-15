@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.tnaapp.tnalayout.R;
 import com.tnaapp.tnalayout.activity.MainActivity;
+import com.tnaapp.tnalayout.activity.fragments.VideosChannelFragment;
 import com.tnaapp.tnalayout.model.ExpandedListView;
 
 import java.util.ArrayList;
@@ -48,11 +49,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private AppCompatActivity _appCompatActivity;
 
     private Context _context;
-    private List<String> _listDataHeader; // header titles - đưa về itemvideos
+    private List<String> _listDataHeader; // header titles - đưa String về itemvideos
     // dữ liệu con theo dạng header - title
     private HashMap<String, List<String>> _listDataChild;
-    private HashMap<String, List<String>> _listDataChildOroginal;
     private HashMap<String, List<String>> _listDataSuggest;
+    private VideosChannelFragment mVideosChannelFragmentOnAdapter;
 
     public ExpandableListAdapter(Context context, List<String> listDataHeader,
                                  HashMap<String, List<String>> listChildData) {
@@ -118,7 +119,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = infalInflater.inflate(R.layout.list_videos_item, null);
-
         }
 
         //sự kiện Click cho list đã mở rộng
@@ -126,7 +126,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View view) {
                 Log.d("onChildClick", childText);
-                ((MainActivity) getSupportActivity()).reloadFloatVideoPlayer("http://rmcdn.2mdn.net/MotifFiles/html/1248596/android_1330378998288.mp4");
+                if((MainActivity) getSupportActivity()!=null){ //cẩn thận kiểm tra null vẫn hơn -_-
+                    ((MainActivity) getSupportActivity()).reloadFloatVideoPlayer("http://rmcdn.2mdn.net/MotifFiles/html/1248596/android_1330378998288.mp4");
+                    ((MainActivity) getSupportActivity()).getVideosChannelFragment().setChannelData(getGroup(groupPosition).toString());
+                    ((MainActivity) getSupportActivity()).getVideosChannelFragment().setVideosData(_listDataChild.get(getGroup(groupPosition).toString()));
+                    ((MainActivity) getSupportActivity()).loadChannelForPlayer();
+                }
             }
         });
 

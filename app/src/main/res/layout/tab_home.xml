@@ -23,4 +23,13 @@
                 android:paddingBottom="10dp"/>
         </android.support.v4.widget.SwipeRefreshLayout>
     </LinearLayout>
+
+    <ProgressBar
+        android:visibility="invisible"
+        android:id="@+id/item_video_loading_view"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center" />
+
 </RelativeLayout>

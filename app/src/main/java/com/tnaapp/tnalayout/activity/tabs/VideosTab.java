@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.tnaapp.tnalayout.R;
@@ -35,6 +36,7 @@ public class VideosTab extends Fragment {
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild; //data merge with header
 
+    private ProgressBar mProgressBar;
 //    private Button mDemoPlayerBtn;
 
     public VideosTab() {
@@ -50,27 +52,14 @@ public class VideosTab extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.tab_video, container, false);
-
-//        mDemoPlayerBtn = (Button) view.findViewById(R.id.btnDemoVideoPlayer);
-//
-//        mDemoPlayerBtn.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View view) {
-////                ((MainActivity) getActivity()).setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-//                ((MainActivity) getActivity()).reloadFloatVideoPlayer();
-//
-//            }
-//        });
-
-        //init expandablelistview
-        listDataHeader = new ArrayList<String>();
-        listDataChild = new HashMap<String, List<String>>();
-
+        mProgressBar = (ProgressBar) view.findViewById(R.id.item_video_loading_view);
         // get the listview
         expListView = (ExpandableListView) view.findViewById(R.id.lvExp);
         // preparing list data
+        listDataHeader = new ArrayList<String>();
+        listDataChild = new HashMap<String, List<String>>();
         prepareListData();
+        //init expandablelistview
         listAdapter = new ExpandableListAdapter(view.getContext(), listDataHeader, listDataChild);
         listAdapter.setSupportActivity(((MainActivity) getActivity()));
         // setting list adapter
@@ -80,24 +69,52 @@ public class VideosTab extends Fragment {
             @Override
             public void onGroupExpand(int groupPosition) {
             }
-
         });
 
         expListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
             @Override
             public void onGroupCollapse(int groupPosition) {
-
-
             }
         });
-
 
         // Inflate the layout for this fragment
         return view;
     }
 
     private void prepareListData() {
-//        // Adding child data
+        final Client client = new Client();
+        client.setListener(new Client.Listener() {
+            @Override
+            public void doneExecute() {
+                RootVideo root = MyConverter.jsonToRootVideo(client.result);
+                Log.wtf("start", client.result);
+                int i = 0;
+                for (Response r : root.getResponse()) {
+                    List<String> video = new ArrayList<String>();
+                    Log.wtf("id", r.getId());
+                    listDataHeader.add(r.getId());
+                    for (Video videoitem : r.getVideos()) {
+                        video.add(videoitem.getTitle());
+                    }
+                    listDataChild.put(listDataHeader.get(i), video);
+                    i++;
+                }
+
+                listAdapter.setDataHeader(listDataHeader);
+                listAdapter.setDataChild(listDataChild);
+                listAdapter.processSuggestData();
+                expListView.setAdapter(listAdapter);
+                mProgressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void preExcute() {
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
+        });
+        client.execute("http://test-data-1094.appspot.com/data/videos", "json");
+
+        //        // Adding child data
 //        listDataHeader.add("Top 250");
 //        listDataHeader.add("Now Showing");
 //        listDataHeader.add("Coming Soon..");
@@ -124,31 +141,6 @@ public class VideosTab extends Fragment {
 //        listDataChild.put(listDataHeader.get(0), top250); // Header, Child data
 //        listDataChild.put(listDataHeader.get(1), nowShowing);
 //        listDataChild.put(listDataHeader.get(2), comingSoon);
-
-        final Client client = new Client();
-        client.setListener(new Client.Listener() {
-            @Override
-            public void doneExecute() {
-                RootVideo root = MyConverter.jsonToRootVideo(client.result);
-                Log.wtf("start", client.result);
-                int i = 0;
-                for (Response r : root.getResponse()) {
-                    List<String> video = new ArrayList<String>();
-                    Log.wtf("id", r.getId());
-                    listDataHeader.add(r.getId());
-                    for (Video videoitem : r.getVideos()) {
-                        video.add(videoitem.getTitle());
-                    }
-                    listDataChild.put(listDataHeader.get(i), video);
-                    i++;
-                }
-                listAdapter.setDataHeader(listDataHeader);
-                listAdapter.setDataChild(listDataChild);
-                listAdapter.processSuggestData();
-                expListView.setAdapter(listAdapter);
-            }
-        });
-        client.execute("http://test-data-1094.appspot.com/data/videos", "json");
     }
 
 }

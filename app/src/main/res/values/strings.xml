@@ -39,9 +39,13 @@
     <string name="pref_sync_frequency_summary">Set the sync frequency</string>
     <string name="pref_user_name">Set username</string>
     <string name="pref_user_name_summary">Set your username</string>
+    <string name="pref_rotation_lock">Rotation Lock</string>
+    <string name="pref_rotation_lock_summary">Lock rotation to portrait mode</string>
+
 
     <string name="pref_user_profile">User Profile</string>
     <string name="pref_update_setting">Update Settings</string>
+    <string name="pref_app_setting">Application Settings</string>
     <!-- media controller  -->
     <string name="description">Media Controls</string>
     <string name="play_error_message">Impossible to play the video.</string>

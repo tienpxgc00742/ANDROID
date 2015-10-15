@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,11 +27,11 @@ public class NewsFragmentItem extends Fragment {
     private ImageView mImage;
     private TextView mTitle, mContent, mTime;
 
-    public WebView getmWebView() {
+    public WebView getWebView() {
         return mWebView;
     }
 
-    public void setmWebView(WebView mWebView) {
+    public void setWebView(WebView mWebView) {
         this.mWebView = mWebView;
     }
 
@@ -76,6 +77,12 @@ public class NewsFragmentItem extends Fragment {
             mContent.setText(mNewsItem.getDes());
             mWebView.loadData(mNewsItem.getmHtml(), "text/html; charset=UTF-8", null);
         }
+        mWebView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("onClickWebView","true");
+            }
+        });
         // Inflate the layout for this fragment
         return rootView;
     }

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.tnaapp.tnalayout.R;
 import com.tnaapp.tnalayout.activity.MainActivity;
@@ -37,7 +38,7 @@ public class HomeTab extends Fragment {
     private RecyclerView.Adapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     public static SwipeNewsFragment mSwipeNewsFragment;
-
+    private ProgressBar mProgressBar;
     public int getmCurrentViewIndex() {
         return mCurrentViewIndex;
     }
@@ -58,8 +59,9 @@ public class HomeTab extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         final View view = inflater.inflate(R.layout.tab_home, container, false);
+
+        mProgressBar = (ProgressBar) view.findViewById(R.id.item_video_loading_view);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
@@ -92,6 +94,12 @@ public class HomeTab extends Fragment {
 
                 mRecyclerView.setAdapter(mAdapter);
 
+                mProgressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void preExcute() {
+                mProgressBar.setVisibility(View.VISIBLE);
             }
         });
         client.execute("http://104.155.237.47/web/api/24h/pull?seasson=","json");
@@ -115,6 +123,11 @@ public class HomeTab extends Fragment {
                                 News news = MyConverter.jsonToRootNew(client.result);
                                 Log.wtf("NEW:",news.getContent());
                                 mItemDemo.get(position).setmHtml(news.getContent());
+                            }
+
+                            @Override
+                            public void preExcute() {
+
                             }
                         });
                         client.execute("http://104.155.237.47/web/api/24h/data?link="+mItemDemo.get(position).getId(),"json");

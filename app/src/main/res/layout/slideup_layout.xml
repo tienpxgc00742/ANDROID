@@ -3,17 +3,16 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:visibility="gone"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <com.tnaapp.tnalayout.control.DraggableViewGroup
-        android:id="@+id/youtubeLayout"
+    <com.tnaapp.tnalayout.control.SlideUpViewGroup
+        android:id="@+id/newsVideosLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="invisible">
 
         <RelativeLayout
             android:id="@+id/viewHeader"
@@ -43,13 +42,21 @@
 
         </RelativeLayout>
 
-        <FrameLayout
+        <RelativeLayout
             android:id="@+id/viewDesc"
             android:background="@color/windowBackground"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="#3b5998"
+                android:gravity="center_horizontal"
+                android:tag="desc"
+                android:text="Title Demo"
+                android:textColor="@android:color/white"
+                android:textSize="35sp" />
+        </RelativeLayout>
 
-        </FrameLayout>
-
-    </com.tnaapp.tnalayout.control.DraggableViewGroup>
+    </com.tnaapp.tnalayout.control.SlideUpViewGroup>
 </LinearLayout>

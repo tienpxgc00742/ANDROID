@@ -19,6 +19,7 @@ public class Client extends AsyncTask<String, String, String> {
     public Listener mListener;
     public static interface Listener {
         void doneExecute();
+        void preExcute();
     }
     public void setListener(Listener listener) {
         mListener = listener;
@@ -26,6 +27,7 @@ public class Client extends AsyncTask<String, String, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        mListener.preExcute(); //hiện progress bar
     }
     @Override
     protected String doInBackground(String... f_url) {
