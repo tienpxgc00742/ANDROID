@@ -1,6 +1,5 @@
 package com.tnaapp.tnalayout.activity;
 
-import android.animation.ObjectAnimator;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +26,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.facebook.AccessToken;
@@ -49,7 +47,6 @@ import com.tnaapp.tnalayout.activity.fragments.FavoriteFragment;
 import com.tnaapp.tnalayout.activity.fragments.GuideFragment;
 import com.tnaapp.tnalayout.activity.fragments.HistoryFragment;
 import com.tnaapp.tnalayout.activity.fragments.HomeFragment;
-import com.tnaapp.tnalayout.activity.fragments.VideosChannelFragment;
 import com.tnaapp.tnalayout.control.DraggableViewGroup;
 import com.tnaapp.tnalayout.control.DraggableViewListener;
 import com.tnaapp.tnalayout.control.SwipeDismissTouchListener;
@@ -75,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private HistoryFragment mHistoryFragment;
     private FavoriteFragment mFavoriteFragment;
     private GuideFragment mGuideFragment;
-    private VideosChannelFragment mVideosChannelFragment;
     public static AccessToken mAccessToken;
     private CallbackManager mCallbackManager;
     private LoginButton mLoginButton;
@@ -91,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     private static DefaultCustomPlayerController mController;
     private static LinearLayout mLayoutDraggable;
     private static ViewGroup mDismissableContainer;
-    private static FrameLayout mVideosChannelContainer;
 
     @Override
     public void onBackPressed() {
@@ -109,8 +104,11 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        loadUserSettings();
         Log.d("onPostCreate", "onPostCreate reached.");
+        if (isRotationLock) {
+            Log.d("onPostCreate", "rotation locked.");
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
     }
 
     @Override
@@ -194,7 +192,6 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         mAboutFragment = new AboutFragment();
         mFavoriteFragment = new FavoriteFragment();
         mGuideFragment = new GuideFragment();
-        mVideosChannelFragment = new VideosChannelFragment();
         //end fragment init
 
         //khởi tạo searchview
@@ -234,7 +231,6 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
             @Override
             public void onDismiss(View view, Object token) {
                 mDismissableContainer.removeView(mDraggableViewGroup);
-                mDraggableViewGroupExist = false;
             }
         }));
         mDraggableViewGroup.setDraggableViewListener(new DraggableViewListener() {
@@ -248,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
                 Log.d("DraggableView", "Minimized");
             }
         });
-        mVideosChannelContainer = (FrameLayout) findViewById(R.id.viewDesc);
         //kết thúc trình chạy video nổi
 
         //theo dõi cảm biến xoay - lật lại video khi xoay lên hoặc xoay ngang - khốn nạn vcc
@@ -271,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
                     if (mRotateState1 == mRotateState2 && !isRotationLock) {
                         Log.d("onOrientationChanged", "2 stage orientation reached, rotate requested, change to auto rotation mode.");
                         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
-                        isForceFullScreenRequest = false;
+                        isForceScreenRequest = false;
                         mRotateState1 = mRotateState2 = false;
 //                        Log.d("onOrientationChanged", "reset rotate stage to stage 1: " + String.valueOf(mRotateState1) + ", stage 2: " + String.valueOf(mRotateState2));
                         this.disable();
@@ -284,22 +279,14 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         };
         //end control orientation sensor
 
-        //chế animation cho Float Player
-        mDraggableViewGroupAnimator = ObjectAnimator.ofFloat(
-                mDraggableViewGroup, "alpha", 1.0f).setDuration(250);
-        //ngừng chế =))
-
         displayView(0);
     }
-
-    private static ObjectAnimator mDraggableViewGroupAnimator;
-    private static boolean mDraggableViewGroupExist = false;
 
     //khởi tạo trình phát video - thêm link trong setVideo
     public static void reloadFloatVideoPlayer(String url) {
         int dismissableViewChildCount = mDismissableContainer.getChildCount();
         Log.d("DismissViewChildCount", String.valueOf(dismissableViewChildCount));
-        if (mCustomVideoView.getPreviousStream() != url) {
+        if(mCustomVideoView.getPreviousStream()!=url){
             mCustomVideoView.setMediaController(mController);
             mCustomVideoView.setOnPlayStateListener(mController);
             mLayoutDraggable.setVisibility(View.VISIBLE);
@@ -310,14 +297,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         if (dismissableViewChildCount != 1 && dismissableViewChildCount < 1) {
             mDismissableContainer.addView(mDraggableViewGroup);
         }
-        if (!mDraggableViewGroupExist) {
-            mDraggableViewGroup.setAlpha(0.0f);
-        }
         mDraggableViewGroup.maximize();
-        if (!mDraggableViewGroupExist) {
-            mDraggableViewGroupAnimator.start();
-            mDraggableViewGroupExist = true;
-        }
     }
 
     //bật theo dõi login
@@ -342,8 +322,11 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
                         @Override
                         public void onCompleted(JSONObject object, GraphResponse response) {
                             try {
-                                FragmentDrawer.mUserName.setText(object.getString("name"));
-
+                                if (_SHARED_PREFS.getString("prefUsername", null) != null || _SHARED_PREFS.getString("prefUsername", null) != "") {
+                                    FragmentDrawer.mUserName.setText(_SHARED_PREFS.getString("prefUsername", null));
+                                } else {
+                                    FragmentDrawer.mUserName.setText(object.getString("name"));
+                                }
                                 Profile profile = Profile.getCurrentProfile();
                                 if (profile != null) {
                                     new DownloadImageTask(FragmentDrawer.mUserImage).execute(Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString());
@@ -362,36 +345,17 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
 
     //tải thông tin từ prefs
     public void loadUserSettings() {
-        isRotationLock = _SHARED_PREFS.getBoolean("prefLockRotation", false);
-        Log.w("isRotationLock", String.valueOf(isRotationLock));
-        if (isRotationLock) {
-            Log.w("onPostCreate", "rotation locked.");
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else {
-            Log.w("onPostCreate", "rotation enabled.");
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+        if (isFacebookLoggedIn) {
+            if (_SHARED_PREFS.getString("prefUsername", null) != null || _SHARED_PREFS.getString("prefUsername", null) != "") {
+                FragmentDrawer.mUserName.setText(_SHARED_PREFS.getString("prefUsername", null));
+            }
         }
-    }
-
-    public VideosChannelFragment getVideosChannelFragment() {
-        if (mVideosChannelFragment != null) {
-            return mVideosChannelFragment;
-        }
-        return new VideosChannelFragment();
-    }
-
-    public void loadChannelForPlayer() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
-        fragmentTransaction.replace(R.id.viewDesc, mVideosChannelFragment);
-        fragmentTransaction.commit();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.w("MainActivity", "Resumed");
+        Log.d("MainActivity", "Resumed");
         loadUserSettings();
         // Logs 'install' and 'app activate' App Events.
         AppEventsLogger.activateApp(this);
@@ -400,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     @Override
     protected void onPause() {
         super.onPause();
-        Log.w("MainActivity", "Paused");
+        Log.d("MainActivity", "Paused");
         // Logs 'app deactivate' App Event.
         AppEventsLogger.deactivateApp(this);
     }
@@ -500,10 +464,10 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     }
 
     //quan trọng
-    //nút fullscreen trên trình chạy nổi - CẦN tích hợp vào javaclass
+    //nút fullscreen trên trình chạy nổi - CẦN tích hợp vào class
     @Override
     public void requestFullScreen() {
-        isForceFullScreenRequest = true;
+        isForceScreenRequest = true;
         mOrientationEventListener.enable();
         if (!mDraggableViewGroup.isFullScreen) {
             //ép buộc nhấn phím, không xoay bằng cảm biến
@@ -523,7 +487,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
         super.onConfigurationChanged(newConfig);
         //thiết đặt mặc định khi player chưa hiển thị
         if (!isRotationLock) {
-            if (!mDraggableViewGroup.isMinimize && mController.getMediaPlayer() != null && mController.getMediaPlayer().isPlaying() && !isForceFullScreenRequest) {
+            if (!mDraggableViewGroup.isMinimize && mController.getMediaPlayer() != null && mController.getMediaPlayer().isPlaying() && !isForceScreenRequest) {
                 //xoay bằng cảm biến
                 if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                     mController.setFullSreenButtonIconByStage(true);
@@ -541,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements FragmentDrawer.Fr
     //nếu thực hiện fullscreen bằng button
     //xoay lên 1 lần nữa để đưa về tự động xoay
     private boolean mRotateState1, mRotateState2 = false; //lưu lại state khi xoay
-    private boolean isForceFullScreenRequest = false; //bấm nút fullscreen hay dùng xoay bằng cảm biếm
+    private boolean isForceScreenRequest = false; //bấm nút fullscreen hay dùng xoay bằng cảm biếm
     private OrientationEventListener mOrientationEventListener; //theo dõi cảm biến xoay
     private boolean isRotationLock = true; //khóa xoay - vô hiệu xoay cảm biến - load từ settings
 }
